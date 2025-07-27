@@ -38,7 +38,8 @@ variable "public_subnets" {
 variable "node_group_instance_types" {
   description = "Instance types for EKS node group"
   type        = list(string)
-  default     = ["t4g.medium"]
+  default     = ["t3.medium"]
+  # default     = ["t4g.medium"] # For MacOS - ARM
 }
 
 variable "node_group_desired_size" {

@@ -1,3 +1,5 @@
+#eks.tf
+
 # EKS Module
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"
@@ -20,6 +22,7 @@ module "eks" {
 
       # Instance types for worker nodes
       instance_types = var.node_group_instance_types
+      # ami_type       = "AL2023_ARM_64_STANDARD" # Use this case in case you use the ARM machine.
 
       # Autoscaling configuration
       min_size     = var.node_group_min_size
@@ -55,29 +58,4 @@ module "eks" {
 
   # Tags for EKS resources
   tags = var.tags
-}
-
-# Install Metrics Server via Helm
-resource "helm_release" "metrics_server" {
-  name       = "metrics-server"
-  repository = "https://kubernetes-sigs.github.io/metrics-server/"
-  chart      = "metrics-server"
-  namespace  = "kube-system"
-  version    = var.metrics_server_version
-
-  # Helm values to configure the metrics-server
-  values = [
-    yamlencode({
-      args = [
-        "--cert-dir=/tmp",
-        "--secure-port=4443",
-        "--kubelet-preferred-address-types=InternalIP,ExternalIP,Hostname",
-        "--kubelet-use-node-status-port",
-        "--metric-resolution=15s"
-      ]
-    })
-  ]
-
-  # Ensure EKS is created before installing the chart
-  depends_on = [module.eks]
 }

@@ -1,0 +1,4 @@
+aws eks update-kubeconfig --region us-east-1 --name kiet-demo-eks-cluster
+
+
+kubectl apply -f ./sample-app/deployment.yaml

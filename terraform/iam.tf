@@ -21,10 +21,10 @@ resource "aws_iam_role" "demo_role" {
   tags = var.tags
 }
 
-# S3 Read-only policy for IRSA
+# S3 Read/Write  policy for IRSA
 resource "aws_iam_policy" "s3_read_write" {
   name        = "${var.cluster_name}-s3-read_write"
-  description = "S3 read-only access policy for IRSA demo"
+  description = "S3 read/write access policy for IRSA demo"
 
   policy = jsonencode({
     Version = "2012-10-17"

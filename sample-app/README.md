@@ -37,19 +37,19 @@ If parameters are missing, defaults will be used.
 
 ### Build (for Mac M1 - ARM64)
 
-`docker buildx build --platform linux/arm64 -t s3-write-test:latest .`
+`docker buildx build --platform linux/arm64 -t <image-name>:latest .`
 
 ### Rebuild & Override (Save Disk Space)
 
-`docker buildx build --platform linux/arm64 --no-cache -t s3-write-test:latest .`
+`docker buildx build --platform linux/arm64 --no-cache -t <image-name>:latest .`
 
 ### Tag for ECR
 
-`docker tag s3-write-test:latest 537940551831.dkr.ecr.us-east-1.amazonaws.com/s3-write-test:latest`
+`docker tag <image-name>:latest <account-id>.dkr.ecr.<region>.amazonaws.com/<image-name>:latest`
 
 ### Push to ECR
 
-`docker push 537940551831.dkr.ecr.us-east-1.amazonaws.com/s3-write-test:latest`
+`docker push <account-id>.dkr.ecr.<region>.amazonaws.com/<image-name>:latest`
 
 
 ### Run
@@ -58,7 +58,7 @@ If parameters are missing, defaults will be used.
 # export AWS_ACCESS_KEY_ID=your-access-key
 # export AWS_SECRET_ACCESS_KEY=your-secret-key
 
-docker run --platform linux/arm64 \
+docker run \
   -e S3_BUCKET \
   -e AWS_ACCESS_KEY_ID \
   -e AWS_SECRET_ACCESS_KEY \
