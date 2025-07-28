@@ -2,6 +2,17 @@
 
 This repository contains a complete Amazon EKS (Elastic Kubernetes Service) exercise with a sample application and Terraform infrastructure code.
 
+## Evidences
+[evidence.md](evidences/evidence.md)
+
+This include evidences for
+- Cluster Startup
+- IRSA using Terraform
+- IRSA using 
+- Github Action for deployment
+- Metrics Server
+- Others
+
 ## Project Structure
 
 ```
@@ -73,7 +84,8 @@ terraform apply
 
 # Change context to the created cluster.
 aws eks update-kubeconfig --region us-east-1 --name kiet-demo-eks-cluster
- 
+kubectl config use-context <eks-arn>
+
 # Verify the connection
 kubectl get nodes
 
@@ -85,6 +97,56 @@ kubectl get nodes
 
 # Finally, go to EC2 > Load Balancers, We can access the application using the URL on this page.
 ```
+### Use eksctl to create irsa
+
+
+```bash
+aws iam create-policy \
+  --policy-name <policy-name> \
+  --policy-document '{
+    "Version": "2012-10-17",
+    "Statement": [{
+      "Effect": "Allow",
+      "Action": [
+        "s3:PutObject",
+        "s3:GetObject",
+        "s3:ListBucket"
+      ],
+      "Resource": [
+        "arn:aws:s3:::*",
+        "arn:aws:s3:::*/*"
+      ]
+    }]
+  }'
+
+eksctl create iamserviceaccount \
+  --name <service-account-name> \
+  --namespace default \
+  --cluster <cluster-name> \
+  --attach-policy-arn arn:aws:iam::<account-id>:policy/<policy-name> \
+  --approve
+
+# In your deployment YAML
+spec:
+  serviceAccountName: <service-account-name>
+  containers:
+    - name: app
+      image: <aws-account-id>.dkr.ecr.<region>.amazonaws.com/<image-name>:<tag>
+      ports:
+        - containerPort: 3000
+      env:
+        - name: S3_BUCKET
+          value: <bucket-name>
+          
+
+# To Authenticate the Github Action we also need to:
+- Create IAM Role
+- Add necessary permission
+- Setup trust policy to trust Github OIDC
+- Update EKS config map to allow this role to execute deployment
+  - Most simple way is to update config map directly kubectl edit configmap aws-auth -n kube-system
+```
+
 
 # Sample Application
 ## S3 Write API (Node.js)
@@ -110,9 +172,7 @@ export S3_BUCKET=your-bucket-name
 node index.js
 ```
 
-Visit:  
-http://localhost:3000/s3/write?name=test.txt&content=hello
-If parameters are missing, defaults will be used.
+- Visit: http://localhost:3000/s3/write?name=test.txt&content=hello (If parameters are missing, defaults will be used.)
 ---
 
 ## 2. Build Docker Image
@@ -139,19 +199,17 @@ docker run \
   -e AWS_ACCESS_KEY_ID \
   -e AWS_SECRET_ACCESS_KEY \
   -p 3000:3000 <image-name>:latest
-  ```
+```
 
-Visit:
-http://localhost:3000/s3/write?name=test.txt&content=hello
+- Visit: http://localhost:3000/s3/write?name=test.txt&content=hello
 
 ---
 ## 3. K8S run on local
 Apply & Access
 ```
 kubectl apply -f deployment.yaml
-kubectl port-forward svc/s3-writer-svc 8080:80
+kubectl port-forward svc/<image-name>-svc 8080:80
 ```
 
-Then open in browser:
-http://localhost:8080/s3/write?name=demo.txt&content=test
+- Then open in browser: http://localhost:8080/s3/write?name=demo.txt&content=test
 

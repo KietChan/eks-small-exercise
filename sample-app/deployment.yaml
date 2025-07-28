@@ -12,7 +12,7 @@ spec:
       labels:
         app: s3-writer
     spec:
-      serviceAccountName: kiet-s3-writer-sa
+      serviceAccountName: demo-service-account
       containers:
         - name: app
           image: 537940551831.dkr.ecr.us-east-1.amazonaws.com/s3-write-test:latest

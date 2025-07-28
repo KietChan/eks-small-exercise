@@ -55,3 +55,18 @@ provider "helm" {
     }
   }
 }
+
+resource "helm_release" "kiet_metrics_server" {
+  name       = "kiet-metrics-server"
+  namespace  = "kube-system"
+  repository = "https://kubernetes-sigs.github.io/metrics-server/"
+  chart      = "metrics-server"
+  version    = "3.11.0" # check for latest if needed
+
+  set {
+    name  = "args"
+    value = "{--kubelet-insecure-tls}"
+  }
+
+  depends_on = [module.eks]
+}
